@@ -21,7 +21,8 @@ Start the service with uvicorn:
 uvicorn app.main:app --reload
 ```
 
-The application is defined in `app/main.py`.
+The application is defined in `app/main.py`. By default uvicorn serves on
+`http://127.0.0.1:8000`, so the examples below use that base URL.
 
 ## Test
 
@@ -38,12 +39,26 @@ pytest
 Liveness/readiness hook. Requires no authentication and returns 200 with a
 small JSON body. Use it to check that the service is up.
 
+Example:
+
+```
+curl http://127.0.0.1:8000/
+```
+
 ### POST /login
 
 Accepts a JSON request body:
 
 ```
 {"email": "...", "password": "..."}
+```
+
+Example:
+
+```
+curl -X POST http://127.0.0.1:8000/login \
+  -H "Content-Type: application/json" \
+  -d '{"email": "user@example.com", "password": "secret"}'
 ```
 
 Responses:
