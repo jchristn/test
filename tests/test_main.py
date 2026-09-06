@@ -4,7 +4,7 @@ Exercised through TestClient so the full request/response cycle -- Pydantic
 validation, route handling, and status/body shaping -- is covered.
 """
 
-from tests.conftest import KNOWN_EMAIL, KNOWN_PASSWORD
+from tests.conftest import KNOWN_EMAIL, KNOWN_PASSWORD, UNKNOWN_EMAIL
 
 
 # --- GET / (healthcheck) ----------------------------------------------------
@@ -79,7 +79,7 @@ def test_login_wrong_password_returns_401(client):
 def test_login_unknown_email_returns_401(client):
     """Unknown email returns 401 Invalid credentials."""
     response = client.post(
-        "/login", json={"email": "nobody@example.com", "password": KNOWN_PASSWORD}
+        "/login", json={"email": UNKNOWN_EMAIL, "password": KNOWN_PASSWORD}
     )
     assert response.status_code == 401
     assert response.json() == {"detail": "Invalid credentials"}
@@ -95,7 +95,7 @@ def test_login_unknown_email_and_wrong_password_are_identical(client):
         "/login", json={"email": KNOWN_EMAIL, "password": "nope"}
     )
     unknown_email = client.post(
-        "/login", json={"email": "nobody@example.com", "password": "nope"}
+        "/login", json={"email": UNKNOWN_EMAIL, "password": "nope"}
     )
     assert wrong_password.status_code == unknown_email.status_code == 401
     assert wrong_password.json() == unknown_email.json()

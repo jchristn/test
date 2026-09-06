@@ -7,7 +7,7 @@ the single place validation logic lives.
 
 from app.auth import verify_credentials
 
-from tests.conftest import KNOWN_EMAIL, KNOWN_PASSWORD
+from tests.conftest import KNOWN_EMAIL, KNOWN_PASSWORD, UNKNOWN_EMAIL
 
 
 def test_verify_credentials_true_for_valid_pair():
@@ -22,7 +22,7 @@ def test_verify_credentials_false_for_wrong_password():
 
 def test_verify_credentials_false_for_unknown_email():
     """Unknown email returns False regardless of password."""
-    assert verify_credentials("nobody@example.com", KNOWN_PASSWORD) is False
+    assert verify_credentials(UNKNOWN_EMAIL, KNOWN_PASSWORD) is False
 
 
 def test_verify_credentials_unknown_and_wrong_are_indistinguishable():
@@ -31,7 +31,7 @@ def test_verify_credentials_unknown_and_wrong_are_indistinguishable():
     This is the seam-level anti-enumeration guarantee: a caller cannot
     tell an unknown-email failure apart from a wrong-password failure.
     """
-    unknown = verify_credentials("nobody@example.com", "whatever")
+    unknown = verify_credentials(UNKNOWN_EMAIL, "whatever")
     wrong = verify_credentials(KNOWN_EMAIL, "whatever")
     assert unknown is False
     assert wrong is False
