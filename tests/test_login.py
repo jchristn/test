@@ -8,10 +8,16 @@ are the deterministic values seeded in app/users.py.
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.users import USERS
 
-# Deterministic seeded user, confirmed against app/users.py.
-KNOWN_EMAIL = "user@example.com"
-KNOWN_PASSWORD = "password123"
+# Derive the deterministic known user from the seeded store itself, so the
+# test can never silently drift from app/users.py. The store is seeded with a
+# single deterministic user for this exercise; take that first entry.
+KNOWN_EMAIL, KNOWN_PASSWORD = next(iter(USERS.items()))
+
+# An email guaranteed NOT to be in the store, for the unknown-account path.
+UNKNOWN_EMAIL = "nobody@example.com"
+assert UNKNOWN_EMAIL not in USERS
 
 client = TestClient(app)
 
@@ -43,7 +49,7 @@ def test_login_wrong_password_returns_401():
 def test_login_unknown_email_returns_401():
     """POST /login with an unknown email returns 401."""
     response = client.post(
-        "/login", json={"email": "nobody@example.com", "password": KNOWN_PASSWORD}
+        "/login", json={"email": UNKNOWN_EMAIL, "password": KNOWN_PASSWORD}
     )
     assert response.status_code == 401
 
@@ -63,7 +69,7 @@ def test_login_401_responses_are_identical():
         "/login", json={"email": KNOWN_EMAIL, "password": "wrong-password"}
     )
     unknown_email = client.post(
-        "/login", json={"email": "nobody@example.com", "password": "wrong-password"}
+        "/login", json={"email": UNKNOWN_EMAIL, "password": "wrong-password"}
     )
     assert wrong_password.status_code == unknown_email.status_code == 401
     assert wrong_password.json() == unknown_email.json()
